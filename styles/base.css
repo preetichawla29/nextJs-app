@@ -1,0 +1,55 @@
+.text-blue {
+    --tw-text-opacity: 1;
+    color: blue;
+  }
+
+  ul {
+    display: flex;
+  }
+  table {
+    table-layout: fixed;
+    border: 1px solid #ccc;
+  }
+  td {
+    padding: 0 10px;
+    word-wrap: break-word;
+    border: 1px solid #ccc;
+    padding: 5px 10px;
+  }
+  .dropdown { 
+    display: inline-block; 
+    position: relative; 
+    color: #fff;
+    margin-right: 30px;
+  } 
+  .dropdown-content {
+    position: absolute;
+    display: none;
+    width: 150px;
+    overflow: auto;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+    background-color: #fff;
+}
+.dropdown:hover .dropdown-content {
+  display: block;
+}
+.dropdown-content a {
+  display: block;
+  color: #000000;
+  padding: 5px;
+  text-decoration: none;
+}
+.dropdown-content a:hover {
+  color: #FFFFFF;
+  background-color: #00A4BD;
+}
+
+ol {
+  list-style-type: disc;
+  margin: 20px;
+}
+
+blockquote {
+  font-style: italic;
+}
