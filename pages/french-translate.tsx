@@ -1,25 +1,16 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Layout } from "components/layout"
+import { useAuth } from "contexts/AuthContext";
+import { getContributionNodeData } from "lib/drupal";
 
-async function fetchTranslatedData(nodeId, language) {
-  try {
-    const response = await axios.get(
-      `https://contribution-tracker.ddev.site/${language}/jsonapi/node/contribution/${nodeId}`
-    );
-
-    return response.data.data; // Assuming you're interested in the "data" part of the response
-  } catch (error) {
-    console.error('Error fetching translated data:', error);
-    throw error;
-  }
-}
 export default function TranslatedDataComponent() {
   const [translatedData, setTranslatedData] = useState(null);
+  const { base64Credentials } = useAuth();
 
   useEffect(() => {
     // Fetch translated data when the component mounts
-    fetchTranslatedData('268e2f71-eaf9-44df-aac7-aacfbd72bfa7', 'fr') 
+    getContributionNodeData('268e2f71-eaf9-44df-aac7-aacfbd72bfa7', 'fr', base64Credentials) 
       .then((data) => {
         setTranslatedData(data);
       });
