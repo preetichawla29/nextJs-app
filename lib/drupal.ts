@@ -1,4 +1,5 @@
-import { DrupalClient } from "next-drupal"
+import axios from "axios";
+import { DrupalClient } from "next-drupal";
 
 export const drupal = new DrupalClient(
   process.env.NEXT_PUBLIC_DRUPAL_BASE_URL,
@@ -10,61 +11,64 @@ export const drupal = new DrupalClient(
         `${process.env.BASIC_AUTH_USERNAME}:${process.env.BASIC_AUTH_PASSWORD}`
       ).toString("base64"),
   }
-)
+);
 
+// Reusable Axios instance
+const axiosInstance = axios.create({
+  headers: {
+    "Access-Control-Allow-Origin": "http://localhost:3000",
+    "Access-Control-Allow-Headers": "Content-Type",
+  },
+});
 
-//Block Data function
-import axios from 'axios';
-
-export const getBlockData = async (blockId,  language) => {
-    try {
-      const response = await axios.get(
-        `https://contribution-tracker.ddev.site/${language}/jsonapi//block_content/basic/${blockId}`
-      );
-  
-      return response.data.data; // Assuming you're interested in the "data" part of the response
-    } catch (error) {
-      console.error('Error fetching Block data:', error);
-      throw error;
-    }
-  }
-
-
-// Function to make an authenticated API request
-async function fetchAuthenticatedData(username, password) {
-  const baseURL = 'https://contribution-tracker.ddev.site/jsonapi/node/contribution/25cc193f-1b61-422e-9eaa-7edf5d53fc17';
-
+// Function to authenticate and get data as per url.
+async function fetchAuthenticatedData(url, base64Credentials) {
   try {
-    // Create an axios instance with the base URL
-    const axiosInstance = axios.create({
-      baseURL,
-      auth: {
-        username,
-        password,
-      },
-    });
-
-    // Make the authenticated API request
-    const base64Credentials = Buffer.from(`${username}:${password}`).toString('base64');
-
-    // Make a GET request to the JSON API endpoint with authentication headers
-    const response = await axiosInstance.get(baseURL, {
+    // const base64Credentials = Buffer.from(`${username}:${password}`).toString(
+    //   "base64"
+    // );
+    const response = await axiosInstance.get(url, {
       headers: {
         Authorization: `Basic ${base64Credentials}`,
-        crossdomain: true,
-        'Access-Control-Allow-Origin': 'http://localhost:3000',
-        'Access-Control-Allow-Headers': 'Content-Type'
-        
       },
     });
-    // Return the response data
     return response.data.data;
-    
   } catch (error) {
-    console.error('Error fetching data:', error);
+    console.error("Error fetching data:", error);
     throw error;
   }
 }
 
-export { fetchAuthenticatedData };
-  
+// Block data function
+export async function getBlockData(blockId:string, language:string, base64Credentials:string) {
+  const url = `https://contribution-tracker.ddev.site/${language}/jsonapi/block_content/basic/${blockId}`;
+  return await fetchAuthenticatedData(url, base64Credentials);
+}
+
+// Node data function
+export async function getNodeData(nodeId:string, base64Credentials:string) {
+  const url = `https://contribution-tracker.ddev.site/jsonapi/node/contribution/${nodeId}`;
+  return await fetchAuthenticatedData(url, base64Credentials);
+}
+
+export async function getContributionNodeData(nodeId:string, language:string, base64Credentials:string) {
+  const url = `https://contribution-tracker.ddev.site/${language}/jsonapi/node/contribution/${nodeId}`;
+  return await fetchAuthenticatedData(url, base64Credentials);
+}
+
+export async function getWishlistData(base64Credentials:string){
+    const url = `https://contribution-tracker.ddev.site/jsonapi/node/wishlist`;
+    return await fetchAuthenticatedData(url, base64Credentials);
+ }
+
+export async function getContributionListData(base64Credentials:string){
+    const url = `https://contribution-tracker.ddev.site/jsonapi/node/contribution`;
+    try {
+      const response = await axios.get(url);
+      return response.data.data;
+    } catch (error) {
+      console.error('Error fetching wishlist data:', error);
+      throw error;
+    }
+ }
+ 

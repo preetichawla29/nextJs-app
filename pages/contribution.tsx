@@ -2,9 +2,10 @@ import Head from "next/head"
 import { GetStaticPropsResult } from "next"
 import { DrupalNode } from "next-drupal"
 
-import { drupal } from "lib/drupal"
+import { drupal, getContributionListData } from "lib/drupal"
 import { Layout } from "components/layout"
 import { NodeContributionTeaser } from "components/node--contribution--teaser"
+// import { useAuth } from "contexts/AuthContext"
 interface IndexPageProps {
   nodes: DrupalNode[]
 }
@@ -64,3 +65,12 @@ export async function getStaticProps(
   }
 }
 
+
+// export async function getStaticProps() {
+//   const nodes = await getContributionListData()
+//   return {
+//     props: {
+//       nodes,
+//     },
+//   }
+// }

@@ -1,17 +1,20 @@
 import Head from "next/head"
-import { GetStaticPropsResult } from "next"
-import { DrupalNode } from "next-drupal"
 import Link from "next/link"
-import { absoluteUrl, formatDate } from "lib/utils"
+import { formatDate } from "lib/utils"
 
-import { drupal } from "lib/drupal"
+import { getWishlistData } from "lib/drupal"
 import { Layout } from "components/layout"
+import { useAuth } from "contexts/AuthContext";
+import useSWR from 'swr'
 
-interface IndexPageProps {
-    nodes: DrupalNode[]
-}
+export default function IndexPage() {
+  const { base64Credentials } = useAuth();
 
-export default function IndexPage({ nodes }: IndexPageProps) {
+  const { data:nodes , error, isLoading } = useSWR(base64Credentials, getWishlistData)
+
+  if (error) return "An error has occurred.";
+  if (isLoading) return "Loading...";
+
   return (
     <Layout>
       <Head>
@@ -36,20 +39,20 @@ export default function IndexPage({ nodes }: IndexPageProps) {
           nodes.map((node) => (
             <tr key={node.id}>
              <td>
-             <h2 className="mb-4 text-1xl">{node.title}</h2></td>
+             <h2 className="mb-4 text-1xl">{node.attributes.title}</h2></td>
           <td>  
-             <Link className="text-blue" href={node.field_contribution_project.uri}>
-					      {node.field_contribution_project.uri} 
+             <Link className="text-blue" href={node.attributes.field_contribution_project.uri}>
+					      {node.attributes.field_contribution_project.uri}
               </Link>
           </td>
           <td>  
             <div className="mb-4 text-gray-600">
-              <span>{formatDate(node.created)}</span>
+              <span>{formatDate(node.attributes.created)}</span>
             </div>
           </td>
           <td>
             <div className="mb-4 text-gray-600">
-             <span>{formatDate(node.changed)}</span>
+             <span>{formatDate(node.attributes.changed)}</span>
             </div>
           </td>
             </tr>
@@ -62,27 +65,4 @@ export default function IndexPage({ nodes }: IndexPageProps) {
         </main>
     </Layout>
   )
-}
-
-export async function getStaticProps(
-  context
-): Promise<GetStaticPropsResult<IndexPageProps>> {
-  const nodes = await drupal.getResourceCollectionFromContext<DrupalNode[]>(
-    "node--wishlist",
-    context,
-    {
-      params: {
-        "filter[status]": 1,
-        "fields[node--contribution]": "title,path,field_contribution_files,uid,created",
-        include: "node_type, revision_uid, uid, menu_link, field_contribution_review_status, field_contribution_reviewer",
-        sort: "-created",
-      },
-    }
-  )
-
-  return {
-    props: {
-      nodes,
-    },
-  }
 }
